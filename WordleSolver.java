@@ -4,47 +4,25 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
 import java.util.ArrayList;
-import java.util.Arrays;
-
+import java.util.Arrays; 
 
 public class WordleSolver {
     private static List<String> ignoreWords = new ArrayList<>();
     private static List<String> board = new ArrayList<>();
 
-    private static List<String> mustHave(List<String> bigList, String must) {
-        List<String> newList = new ArrayList<>();
-        for (String word : bigList) {
-            boolean flag = true;
-            for (char ch : must.toCharArray()) {
-                if (word.indexOf(ch) == -1) {
-                    flag = false;
-                    break;
-                }
+    private static List<String> letterWords() {
+        List<String> rows = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader("wordle-solver/words.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                rows.add(line.trim());
             }
-            if (flag) {
-                newList.add(word);
-            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return newList;
+        return rows;
     }
-
-    private static List<String> remover(List<String> bigList, String ignore) {
-        List<String> newList = new ArrayList<>();
-        for (String word : bigList) {
-            boolean flag = true;
-            for (char ch : ignore.toCharArray()) {
-                if (word.indexOf(ch) != -1) {
-                    flag = false;
-                    break;
-                }
-            }
-            if (flag) {
-                newList.add(word);
-            }
-        }
-        return newList;
-    }
-
+    
     private static List<String> matcher(List<String> bigList, List<String> target) {
         List<String> results = new ArrayList<>();
         
@@ -64,32 +42,53 @@ public class WordleSolver {
         return results;
     }
 
-    private static List<String> letterWords() {
-        List<String> rows = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader("wordle-solver/words.txt"))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                rows.add(line.trim());
+    private static List<String> remover(List<String> bigList, String ignore) {
+        List<String> newList = new ArrayList<>();
+        for (String word : bigList) {
+            boolean flag = true;
+            for (char ch : ignore.toCharArray()) {
+                if (word.indexOf(ch) != -1) {
+                    flag = false;
+                    break;
+                }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            if (flag) {
+                newList.add(word);
+            }
         }
-        return rows;
+        return newList;
     }
 
-    private static void initializeBoard() {
-        int i = 0;
-        while(i < 5) {
-            i = userEntry(i);
+    private static List<String> mustHave(List<String> bigList, String must) {
+        List<String> newList = new ArrayList<>();
+        for (String word : bigList) {
+            boolean flag = true;
+            for (char ch : must.toCharArray()) {
+                if (word.indexOf(ch) == -1) {
+                    flag = false;
+                    break;
+                }
+            }
+            if (flag) {
+                newList.add(word);
+            }
         }
-        display(board);
+        return newList;
+    }
+
+    private static void display(List<String> currentBoard) {
+        System.out.println(currentBoard);
+    }
+    private static String getInput(String prompt) {
+        System.out.print(prompt + " ");
+        Scanner scanner = new Scanner(System.in);
+        return scanner.nextLine();
     }
 
     private static int userEntry(int location) {
         String initialState = board.get(location);
         board.set(location, "=");
-        String prompt = "Your current cell is marked with a '='.\n * Enter a letter if you know it belongs in that cell.\n * Enter a space if you want to skip to the next cell.\n * Enter '1' to move one cell back and make changes.\n * Enter '0' to exit the board editing process.";
-        System.out.println(prompt);
+
         String userInput = getInput(board.toString());
 
         if (userInput.equals(" ") || userInput.isEmpty()) {
@@ -107,14 +106,12 @@ public class WordleSolver {
         }
     }
 
-    private static String getInput(String prompt) {
-        System.out.print(prompt + " ");
-        Scanner scanner = new Scanner(System.in);
-        return scanner.nextLine();
-    }
-    
-    private static void display(List<String> currentBoard) {
-        System.out.println(currentBoard);
+    private static void initializeBoard() {
+        int i = 0;
+        while(i < 5) {
+            i = userEntry(i);
+        }
+        display(board);
     }
 
     private static void resetBoard() {
@@ -123,7 +120,6 @@ public class WordleSolver {
             board.add("_");
         }
     }
-
     private static void play() {
         resetBoard();
         initializeBoard();
@@ -162,7 +158,6 @@ public class WordleSolver {
             }
         }
     }
-
     public static void main(String[] args) {
       play();
     }
